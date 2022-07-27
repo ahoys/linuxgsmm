@@ -10,6 +10,7 @@ const PORT = process.env.PORT;
 const PATH_TO_GSM = process.env.PATH_TO_GSM;
 const ALLOWED_COMMANDS = process.env.ALLOWED_COMMANDS;
 const PATH_TO_LOGS = process.env.PATH_TO_LOGS;
+const PATH_TO_MIDDLEWARE = process.env.PATH_TO_MIDDLEWARE;
 
 if (typeof PORT !== 'string' || !PORT.trim().length) {
   throw new Error('Invalid or missing process.env.PORT!');
@@ -29,6 +30,13 @@ if (typeof PATH_TO_LOGS !== 'string' || !fs.existsSync(PATH_TO_LOGS)) {
 
 if (typeof ALLOWED_COMMANDS !== 'string' || !ALLOWED_COMMANDS.trim().length) {
   throw new Error('Invalid or missing process.env.ALLOWED_COMMANDS!');
+}
+
+if (
+  typeof PATH_TO_MIDDLEWARE === 'string' &&
+  !fs.existsSync(PATH_TO_MIDDLEWARE)
+) {
+  throw new Error("PATH_TO_MIDDLEWARE was given but it doesn't exist!");
 }
 
 setLogDirPath(PATH_TO_LOGS ?? __dirname);
@@ -56,23 +64,39 @@ const exec = (req: express.Request, res: express.Response) => {
   try {
     const { command } = req?.body || {};
     if (typeof command === 'string' && allowedCommands.includes(command)) {
-      execFile(PATH_TO_GSM, [command], (error, stdout, stderr) => {
-        if (stderr) {
-          log(stderr);
-        }
-        if (error) {
-          logprint(error);
-          res.status(500).end();
-        } else {
-          res.status(200).send({ stdout, stderr });
-        }
-      });
+      const runExecLinuxGSM = (mwStdout?: string, mwStderr?: string) => {
+        execFile(PATH_TO_GSM, [command], (error, stdout, stderr) => {
+          if (stderr) {
+            log(stderr);
+          }
+          if (error) {
+            logprint(error);
+          }
+          res.status(200).send({ stdout, stderr, mwStdout, mwStderr });
+        });
+      };
+      if (PATH_TO_MIDDLEWARE) {
+        // Middleware should be ran before LinuxGSM.
+        execFile(PATH_TO_MIDDLEWARE, [command], (error, stdout, stderr) => {
+          if (stderr) {
+            log(PATH_TO_MIDDLEWARE, stderr);
+          }
+          if (error) {
+            logprint('PATH_TO_MIDDLEWARE', error);
+          } else {
+            runExecLinuxGSM(stdout, stderr);
+          }
+        });
+      } else {
+        // No middleware.
+        runExecLinuxGSM();
+      }
     } else {
       logprint('Request ' + command + ' denied.');
       res.status(401).end();
     }
-  } catch {
-    res.status(500).end();
+  } catch (err) {
+    logprint(err);
   }
 };
 

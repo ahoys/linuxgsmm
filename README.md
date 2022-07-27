@@ -22,10 +22,11 @@ ALLOWED_COMMANDS=start,stop,restart,update
 PATH_TO_LOGS=/home/armareforger/linuxgsmm/logs/
 ```
 
-- **PORT** is the port to call. By using different ports, you can have multiple LinuxGSM instances controlled.
-- **PATH_TO_GSM** refers to LinuxGSM main executable that controls the LinuxGSM instance.
-- **ALLOWED_COMMANDS** refers to LinuxGSM commands that are allowed for the instance.
-- **PATH_TO_LOGS** failures etc will generate log-files that will be stored here.
+- **PORT**: is the port to call. By using different ports, you can have multiple LinuxGSM instances controlled.
+- **PATH_TO_GSM**: refers to LinuxGSM main executable that controls the LinuxGSM instance.
+- **ALLOWED_COMMANDS**: refers to LinuxGSM commands that are allowed for the instance.
+- **PATH_TO_LOGS**: failures etc will generate log-files that will be stored here.
+- **PATH_TO_MIDDLEWARE (optional)**: Custom sh-script that will always run before LinuxGSM. Path to script.
 
 ## Recommendations
 
