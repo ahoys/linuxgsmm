@@ -42,7 +42,7 @@ if (typeof ALLOWED_COMMANDS !== 'string' || !ALLOWED_COMMANDS.trim().length) {
 if (
   typeof BODY_MAX_SIZE_IN_MB === 'string' &&
   (BODY_MAX_SIZE_IN_MB.trim() === '' ||
-    !isNaN(Number(BODY_MAX_SIZE_IN_MB)) ||
+    isNaN(Number(BODY_MAX_SIZE_IN_MB)) ||
     Number(BODY_MAX_SIZE_IN_MB) === 0)
 ) {
   throw new Error('Invalid process.env.BODY_MAX_SIZE_IN_MB!');
