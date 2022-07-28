@@ -26,7 +26,11 @@ PATH_TO_LOGS=/home/armareforger/linuxgsmm/logs/
 - **PATH_TO_GSM**: refers to LinuxGSM main executable that controls the LinuxGSM instance.
 - **ALLOWED_COMMANDS**: refers to LinuxGSM commands that are allowed for the instance.
 - **PATH_TO_LOGS**: failures etc will generate log-files that will be stored here.
+- **BODY_MAX_SIZE_IN_MB (optional)**: maximum size of the received request bodies. Default is 1.
 - **PATH_TO_MIDDLEWARE (optional)**: Custom sh-script that will always run before LinuxGSM. Path to script.
+- **ATTACHMENTS_PATH (optional)**: In case this service supports attachments, define the path for the files.
+- **ATTACHMENTS_ALLOWED_EXTENSIONS (optional)**: Allowed extensions for the attachments. I.e. jpg,png,bmp. If empty, all are allowed.
+- **ATTACHMENTS_ALLOWED_CONTENT_TYPES (optional)**: Allowed content-types for the attachments. I.e. image/jpeg,image/png. If empty, all are allwed.
 
 ## Recommendations
 
