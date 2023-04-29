@@ -1,10 +1,10 @@
 # LinuxGSM master
 
-This is a simple Node-application that enables remote control for LinuxGSM instances.
+This is a simple Node-application providing a REST-service for controlling your LinuxGSM instances remotely.
 
 By sending a command like http://127.0.0.1:5000/api/exec with a body of `{ "command": "update" }`, you can for example update a LinuxGSM server.
 
-My personal use case was to provide these linuxgsmm instances to a Discord-bot, which enables a community controlled gaming server.
+My personal use case was to build a Discord-bot for a gaming community that would be able to control LinuxGSM instances from Discord.
 
 ## How to use
 
@@ -17,6 +17,7 @@ My personal use case was to provide these linuxgsmm instances to a Discord-bot, 
 
 - Use [nvm](https://github.com/nvm-sh/nvm#install--update-script) to install the latest LTS-version of Node.
 - Use [pm2](https://pm2.keymetrics.io/docs/usage/quick-start/) to run this node-application. To make the application start automatically, check `pm2 startup`
+- Make sure this application cannot be accessed from the Internet. There is no authentication included. Use a Discord-bot or some other service in-between to handle the communication to outside.
 
 ### Example .env
 
@@ -35,11 +36,6 @@ ALLOWED_COMMANDS=start,stop,restart,update
 - **ATTACHMENTS_ALLOWED_EXTENSIONS (optional)**: Allowed extensions for the attachments. I.e. jpg,png,bmp. If empty, all are allowed.
 - **ATTACHMENTS_ALLOWED_CONTENT_TYPES (optional)**: Allowed content-types for the attachments. I.e. image/jpeg,image/png. If empty, all are allwed.
 
-## Recommendations
+## Security considerations
 
-- Make sure the port doesn't have a public access. There's no authentication.
-
-## Requirements
-
-- Linux server running LinuxGSM servers.
-- Node >= 12.
+- Make sure this application cannot be accessed from the Internet. There is no authentication involved. Use a Discord-bot or some other service in-between to handle the communication to outside.
