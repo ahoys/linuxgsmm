@@ -2,15 +2,12 @@ import fs from 'fs';
 import express from 'express';
 import superagent from 'superagent';
 import { execFile } from 'child_process';
-import { setLogPrefix, setLogDirPath, logprint, log, print } from 'logscribe';
+import { print } from 'logscribe';
 import { urlencoded, json } from 'body-parser';
-
-setLogPrefix('linuxgsmm');
 
 const PORT = process.env.PORT;
 const PATH_TO_GSM = process.env.PATH_TO_GSM;
 const ALLOWED_COMMANDS = process.env.ALLOWED_COMMANDS;
-const PATH_TO_LOGS = process.env.PATH_TO_LOGS;
 const BODY_MAX_SIZE_IN_MB = process.env.BODY_MAX_SIZE_IN_MB ?? '1';
 const PATH_TO_MIDDLEWARE = process.env.PATH_TO_MIDDLEWARE;
 const ATTACHMENTS_PATH = process.env.ATTACHMENTS_PATH;
@@ -26,12 +23,6 @@ if (typeof PORT !== 'string' || !PORT.trim().length) {
 if (typeof PATH_TO_GSM !== 'string' || !fs.existsSync(PATH_TO_GSM)) {
   throw new Error(
     'Invalid or missing process.env.PATH_TO_GSM! Does the file exist?'
-  );
-}
-
-if (typeof PATH_TO_LOGS !== 'string' || !fs.existsSync(PATH_TO_LOGS)) {
-  throw new Error(
-    'Invalid or missing process.env.PATH_TO_LOGS! Does the folder exist?'
   );
 }
 
@@ -60,8 +51,6 @@ if (
 if (typeof ATTACHMENTS_PATH === 'string' && !fs.existsSync(ATTACHMENTS_PATH)) {
   throw new Error("ATTACHMENTS_PATH was given but the location doesn't exist!");
 }
-
-setLogDirPath(PATH_TO_LOGS ?? __dirname);
 
 // Only pre-defined commands are usable.
 const allowedCommands = (ALLOWED_COMMANDS || '')
@@ -97,10 +86,10 @@ const exec = (req: express.Request, res: express.Response) => {
       const runExecLinuxGSM = (mwStdout?: string, mwStderr?: string) => {
         execFile(PATH_TO_GSM, [command], (error, stdout, stderr) => {
           if (stderr) {
-            log(stderr);
+            print(stderr);
           }
           if (error) {
-            logprint(error);
+            print(error);
           }
           res.status(200).send({ stdout, stderr, mwStdout, mwStderr });
         });
@@ -109,10 +98,10 @@ const exec = (req: express.Request, res: express.Response) => {
         // Middleware should be ran before LinuxGSM.
         execFile(PATH_TO_MIDDLEWARE, [command], (error, stdout, stderr) => {
           if (stderr) {
-            log(PATH_TO_MIDDLEWARE, stderr);
+            print(PATH_TO_MIDDLEWARE, stderr);
           }
           if (error) {
-            logprint('PATH_TO_MIDDLEWARE', error);
+            print('PATH_TO_MIDDLEWARE', error);
           } else {
             runExecLinuxGSM(stdout, stderr);
           }
@@ -122,11 +111,11 @@ const exec = (req: express.Request, res: express.Response) => {
         runExecLinuxGSM();
       }
     } else {
-      logprint('Request ' + command + ' denied.');
+      print('Request ' + command + ' denied.');
       res.status(401).end();
     }
   } catch (err) {
-    logprint(err);
+    print(err);
   }
 };
 
@@ -153,13 +142,13 @@ const attachment = (req: express.Request, res: express.Response) => {
           : ATTACHMENTS_PATH + '/';
         const stream = fs.createWriteStream(pathWithSlash + name);
         stream.on('open', () => {
-          log('Sending a new attachment.', url);
+          print('Sending a new attachment.', url);
         });
         stream.on('finish', () => {
           res.status(200).end();
         });
         stream.on('error', (err) => {
-          logprint(err);
+          print(err);
           res.status(500).end();
         });
         if (!stream.closed) {
@@ -172,7 +161,7 @@ const attachment = (req: express.Request, res: express.Response) => {
       res.status(400).end();
     }
   } catch (err) {
-    logprint(err);
+    print(err);
   }
 };
 
@@ -199,7 +188,7 @@ const bootstrap = () => {
       app.post('/api/attachment', (req, res) => attachment(req, res));
     }
     app.listen(PORT, () => {
-      log(
+      print(
         'Path to LinuxGSM: ' + PATH_TO_GSM,
         'Allowed commands: ' + allowedCommands.join(', ') + '.',
         'Listening http://localhost:' + PORT
@@ -207,7 +196,7 @@ const bootstrap = () => {
       print('Listening http://localhost:' + PORT);
     });
   } catch (err) {
-    logprint(err);
+    print(err);
   }
 };
 
