@@ -127,6 +127,13 @@ const attachment = (req: express.Request, res: express.Response) => {
     const { url, name, size, contentType } = req?.body || {};
     const fileSize =
       !isNaN(Number(size)) && Number(size) > 0 ? Number(size) / 1024 / 1024 : 0;
+    print('Receiving a request for a new attachment.', {
+      url,
+      name,
+      size,
+      fileSize,
+      contentType,
+    });
     if (
       typeof url === 'string' &&
       url.trim() !== '' &&
