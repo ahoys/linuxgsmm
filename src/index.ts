@@ -169,9 +169,10 @@ const attachment = (req: express.Request, res: express.Response) => {
       : ATTACHMENTS_PATH + '/';
     const stream = fs.createWriteStream(pathWithSlash + name);
     stream.on('open', () => {
-      print('Sending a new attachment.', url);
+      print('Opening a tunnel for the attachment:', url);
     });
     stream.on('finish', () => {
+      print('Done. Received', name);
       res.status(200).end();
     });
     stream.on('error', (err) => {
