@@ -142,7 +142,7 @@ const attachment = (req: express.Request, res: express.Response) => {
       const errMessage = 'Attachment rejected. Reason: name is not a string.';
       print(errMessage);
       return res.status(400).send(errMessage);
-    } else if (fileSize <= Number(BODY_MAX_SIZE_IN_MB)) {
+    } else if (fileSize > Number(BODY_MAX_SIZE_IN_MB)) {
       const errMessage = `Attachment rejected. Reason: filesize of ${Number(
         fileSize
       )} is larger than ${Number(BODY_MAX_SIZE_IN_MB)}.`;
