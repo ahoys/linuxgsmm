@@ -134,38 +134,52 @@ const attachment = (req: express.Request, res: express.Response) => {
       fileSize,
       contentType,
     });
-    if (
-      typeof url === 'string' &&
-      url.trim() !== '' &&
-      fileSize <= Number(BODY_MAX_SIZE_IN_MB) &&
-      (!allowedContentTypes.length ||
-        allowedContentTypes.includes(String(contentType)))
-    ) {
-      const urlSplit = url.split('.');
-      const unsafeExt = urlSplit[urlSplit.length - 1];
-      if (!allowedExtensions.length || allowedExtensions.includes(unsafeExt)) {
-        const pathWithSlash = ATTACHMENTS_PATH?.endsWith('/')
-          ? ATTACHMENTS_PATH
-          : ATTACHMENTS_PATH + '/';
-        const stream = fs.createWriteStream(pathWithSlash + name);
-        stream.on('open', () => {
-          print('Sending a new attachment.', url);
-        });
-        stream.on('finish', () => {
-          res.status(200).end();
-        });
-        stream.on('error', (err) => {
-          print(err);
-          res.status(500).end();
-        });
-        if (!stream.closed) {
-          superagent.get(url).pipe(stream);
-        }
-      } else {
-        res.status(400).end();
-      }
-    } else {
-      res.status(400).end();
+    if (typeof url !== 'string') {
+      const errMessage = 'Attachment rejected. Reason: url is not a string.';
+      print(errMessage);
+      return res.status(400).send(errMessage);
+    } else if (typeof name !== 'string') {
+      const errMessage = 'Attachment rejected. Reason: name is not a string.';
+      print(errMessage);
+      return res.status(400).send(errMessage);
+    } else if (fileSize <= Number(BODY_MAX_SIZE_IN_MB)) {
+      const errMessage = `Attachment rejected. Reason: filesize of ${Number(
+        fileSize
+      )} is larger than ${Number(BODY_MAX_SIZE_IN_MB)}.`;
+      print(errMessage);
+      return res.status(400).send(errMessage);
+    } else if (allowedContentTypes.includes(String(contentType))) {
+      const errMessage = `The given file is of wrong content-type: ${String(
+        contentType
+      )}`;
+      print(errMessage);
+      return res.status(400).send(errMessage);
+    }
+    const urlSplit = url.split('.');
+    const unsafeExt = urlSplit[urlSplit.length - 1];
+    if (allowedExtensions.length && !allowedExtensions.includes(unsafeExt)) {
+      const errMessage = `The given file is of wrong filetype: ${String(
+        unsafeExt
+      )}`;
+      print(errMessage);
+      return res.status(400).send(errMessage);
+    }
+    const pathWithSlash = ATTACHMENTS_PATH?.endsWith('/')
+      ? ATTACHMENTS_PATH
+      : ATTACHMENTS_PATH + '/';
+    const stream = fs.createWriteStream(pathWithSlash + name);
+    stream.on('open', () => {
+      print('Sending a new attachment.', url);
+    });
+    stream.on('finish', () => {
+      res.status(200).end();
+    });
+    stream.on('error', (err) => {
+      print(err);
+      res.status(500).end();
+    });
+    if (!stream.closed) {
+      superagent.get(url).pipe(stream);
     }
   } catch (err) {
     print(err);
