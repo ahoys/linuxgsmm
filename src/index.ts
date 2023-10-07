@@ -155,8 +155,8 @@ const attachment = (req: express.Request, res: express.Response) => {
       print(errMessage);
       return res.status(400).send(errMessage);
     }
-    const urlSplit = url.split('.');
-    const unsafeExt = urlSplit[urlSplit.length - 1];
+    const nameSplit = name.split('.');
+    const unsafeExt = nameSplit[nameSplit.length - 1];
     if (allowedExtensions.length && !allowedExtensions.includes(unsafeExt)) {
       const errMessage = `The given file is of wrong filetype: ${String(
         unsafeExt
